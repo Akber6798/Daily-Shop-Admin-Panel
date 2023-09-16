@@ -1,6 +1,9 @@
+import 'package:daily_shop_admin_panel/commonWidgets/drawer_list_tile_widget.dart';
 import 'package:daily_shop_admin_panel/consts/app_text_style.dart';
 import 'package:daily_shop_admin_panel/controllers/theme_controller.dart';
-import 'package:daily_shop_admin_panel/screens/dashBoardScreen/widget/drawer_list_tile_widget.dart';
+import 'package:daily_shop_admin_panel/screens/main_control_screen.dart';
+import 'package:daily_shop_admin_panel/screens/viewAllOrdersScreen/view_all_order_screen.dart';
+import 'package:daily_shop_admin_panel/screens/viewAllProductScreen/view_all_product_screen.dart';
 import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
@@ -21,14 +24,43 @@ class CustomDrawerWidget extends StatelessWidget {
             ),
           ),
           DrawerListTileWidget(
-              title: "Main", pressFunction: () {}, icon: IconlyBold.home),
+              title: "Main",
+              pressFunction: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return const MainControlScreen();
+                    },
+                  ),
+                );
+              },
+              icon: IconlyBold.home),
           DrawerListTileWidget(
               title: "View all products",
-              pressFunction: () {},
+              pressFunction: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return const ViewAllProductScreen();
+                    },
+                  ),
+                );
+              },
               icon: Icons.store),
           DrawerListTileWidget(
               title: "View all orders",
-              pressFunction: () {},
+              pressFunction: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return const ViewAllOrderScreen();
+                    },
+                  ),
+                );
+              },
               icon: IconlyBold.bag_2),
           SwitchListTile(
               title: Text(

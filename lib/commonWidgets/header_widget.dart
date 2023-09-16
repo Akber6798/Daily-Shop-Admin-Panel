@@ -5,9 +5,10 @@ import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
 import 'package:flutter/material.dart';
 
 class HeaderWidget extends StatelessWidget {
-  const HeaderWidget({super.key, required this.function});
+  const HeaderWidget({super.key, required this.function, required this.title});
 
   final Function function;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class HeaderWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "Dashboard",
+              title,
               style: AppTextStyle.instance.mainTextStyle(
                   fSize: 23,
                   fWeight: FontWeight.w600,

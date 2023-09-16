@@ -1,7 +1,7 @@
 import 'package:daily_shop_admin_panel/consts/theme_style.dart';
 import 'package:daily_shop_admin_panel/controllers/main_controller.dart';
 import 'package:daily_shop_admin_panel/controllers/theme_controller.dart';
-import 'package:daily_shop_admin_panel/screens/mainScreen/main_screen.dart';
+import 'package:daily_shop_admin_panel/screens/main_control_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -36,16 +36,14 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => themeController),
-        ChangeNotifierProvider(
-          create: (_) => MainController(),
-        )
+        ChangeNotifierProvider(create: (_) => MainController())
       ],
       child: Consumer<ThemeController>(
         builder: (context, newTheme, child) {
           return MaterialApp(
             theme: ThemeStyle.themeData(newTheme.darkTheme, context),
             debugShowCheckedModeBanner: false,
-            home: const MainScreen(),
+            home: const MainControlScreen(),
           );
         },
       ),

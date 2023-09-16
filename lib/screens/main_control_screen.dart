@@ -1,17 +1,17 @@
+import 'package:daily_shop_admin_panel/commonWidgets/custom_drawer_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/responsive_widget.dart';
 import 'package:daily_shop_admin_panel/controllers/main_controller.dart';
 import 'package:daily_shop_admin_panel/screens/dashBoardScreen/dash_board_screen.dart';
-import 'package:daily_shop_admin_panel/screens/dashBoardScreen/widget/custom_drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MainScreen extends StatelessWidget {
-  const MainScreen({super.key});
+class MainControlScreen extends StatelessWidget {
+  const MainControlScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: context.read<MainController>().getScaffoldKey,
+      key: context.read<MainController>().getDashBoardScaffoldKey,
       drawer: const CustomDrawerWidget(),
       body: SafeArea(
         child: Row(
