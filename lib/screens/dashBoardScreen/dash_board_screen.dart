@@ -62,7 +62,7 @@ class DashBoardScreen extends StatelessWidget {
                       icon: Icons.add,
                       buttonColor: greenColor,
                       onPressedFunction: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) {

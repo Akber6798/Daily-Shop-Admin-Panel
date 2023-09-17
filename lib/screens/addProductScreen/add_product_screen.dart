@@ -8,6 +8,7 @@ import 'package:daily_shop_admin_panel/consts/app_text_style.dart';
 import 'package:daily_shop_admin_panel/controllers/main_controller.dart';
 import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
 import 'package:daily_shop_admin_panel/services/utils.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final priceController = TextEditingController();
+  String categoryDropDownValue = "Vegetables";
+  int radioGroupValue = 1;
+  bool inPiece = false;
 
   void validationForAddProduct() {
     final isValid = formKey.currentState!.validate();
@@ -70,11 +74,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          //! title add
                           Text(
                             "Product Title*",
                             style: AppTextStyle.instance.mainTextStyle(
-                              fSize: 16,
-                              fWeight: FontWeight.w600,
+                              fSize: 15,
+                              fWeight: FontWeight.w500,
                               color: GetColorThemeService(context)
                                   .headingTextColor,
                             ),
@@ -119,12 +124,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
+                                      //! price add
                                       Text(
                                         "Price in ₹*",
                                         style:
                                             AppTextStyle.instance.mainTextStyle(
-                                          fSize: 16,
-                                          fWeight: FontWeight.w600,
+                                          fSize: 15,
+                                          fWeight: FontWeight.w500,
                                           color: GetColorThemeService(context)
                                               .headingTextColor,
                                         ),
@@ -162,21 +168,86 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         ),
                                       ),
                                       const VerticalSpacingWidget(height: 20),
-                                      const Text("Product Category*"),
+                                      //! select category
+                                      Text(
+                                        "Product Category*",
+                                        style:
+                                            AppTextStyle.instance.mainTextStyle(
+                                          fSize: 15,
+                                          fWeight: FontWeight.w500,
+                                          color: GetColorThemeService(context)
+                                              .headingTextColor,
+                                        ),
+                                      ),
                                       const VerticalSpacingWidget(height: 10),
-                                      //* drop down menu
+                                      categoryDropDownButton(),
                                       const VerticalSpacingWidget(height: 20),
-                                      const Text("Measure Unit*"),
+                                      //! select unit
+                                      Text(
+                                        "Measure Unit*",
+                                        style:
+                                            AppTextStyle.instance.mainTextStyle(
+                                          fSize: 15,
+                                          fWeight: FontWeight.w500,
+                                          color: GetColorThemeService(context)
+                                              .headingTextColor,
+                                        ),
+                                      ),
                                       const VerticalSpacingWidget(height: 10),
-                                      //* radio button
+                                      Row(
+                                        children: [
+                                          const Text("KG"),
+                                          Radio(
+                                            value: 1,
+                                            groupValue: radioGroupValue,
+                                            onChanged: (newValue) {
+                                              setState(() {
+                                                radioGroupValue = 1;
+                                                inPiece = false;
+                                              });
+                                            },
+                                            activeColor:
+                                                GetColorThemeService(context)
+                                                    .headingTextColor,
+                                          ),
+                                          const Text("Piece"),
+                                          Radio(
+                                            value: 2,
+                                            groupValue: radioGroupValue,
+                                            onChanged: (newValue) {
+                                              setState(() {
+                                                radioGroupValue = 2;
+                                                inPiece = true;
+                                              });
+                                            },
+                                            activeColor:
+                                                GetColorThemeService(context)
+                                                    .headingTextColor,
+                                          )
+                                        ],
+                                      ),
                                       const VerticalSpacingWidget(height: 20),
                                     ],
                                   ),
                                 ),
                               ),
+                              //! select image
                               Expanded(
                                 flex: 4,
-                                child: Container(color: redColor),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    height: size.width > 650
+                                        ? 350
+                                        : size.width * 0.45,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: dottedBorderContainer(),
+                                  ),
+                                ),
                               ),
                               Expanded(
                                 flex: 1,
@@ -186,11 +257,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       TextButton(
                                         onPressed: () {},
                                         child: Text(
-                                          "Clear",
+                                          "Clear image",
                                           style: AppTextStyle.instance
                                               .mainTextStyle(
-                                                  fSize: 18,
-                                                  fWeight: FontWeight.w600,
+                                                  fSize: 24,
+                                                  fWeight: FontWeight.bold,
                                                   color: redColor),
                                         ),
                                       ),
@@ -201,8 +272,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           "Update image",
                                           style: AppTextStyle.instance
                                               .mainTextStyle(
-                                                  fSize: 18,
-                                                  fWeight: FontWeight.w600,
+                                                  fSize: 24,
+                                                  fWeight: FontWeight.bold,
                                                   color: Colors.blue),
                                         ),
                                       ),
@@ -244,6 +315,68 @@ class _AddProductScreenState extends State<AddProductScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  //! for dropdown
+  Widget categoryDropDownButton() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          style: AppTextStyle.instance.mainTextStyle(
+              fSize: 15, fWeight: FontWeight.w500, color: redColor),
+          onChanged: (newValue) {
+            setState(() {
+              categoryDropDownValue = newValue!;
+            });
+          },
+          value: categoryDropDownValue,
+          hint: const Text("Select a category"),
+          items: const [
+            DropdownMenuItem(value: "Vegetables", child: Text("Vegetables")),
+            DropdownMenuItem(value: "Fruites", child: Text("Fruites")),
+            DropdownMenuItem(value: "Grains", child: Text("Grains")),
+            DropdownMenuItem(value: "Nuts", child: Text("Nuts")),
+            DropdownMenuItem(value: "Herbs", child: Text("Herbs")),
+            DropdownMenuItem(value: "Spices", child: Text("Spices")),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //! for dotborder
+  Widget dottedBorderContainer() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: DottedBorder(
+        dashPattern: const [6, 7],
+        borderType: BorderType.RRect,
+        color: GetColorThemeService(context).textColor,
+        radius: const Radius.circular(12),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.image_outlined,
+                color: GetColorThemeService(context).textColor,
+                size: 150,
+              ),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  "Choose an image",
+                  style: AppTextStyle.instance.mainTextStyle(
+                      fSize: 18, fWeight: FontWeight.w600, color: Colors.blue),
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

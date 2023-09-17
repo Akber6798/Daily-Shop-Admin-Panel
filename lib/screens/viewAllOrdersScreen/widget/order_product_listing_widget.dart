@@ -11,7 +11,7 @@ class OrderProductListing extends StatelessWidget {
       shrinkWrap: true,
       itemCount: 10,
       itemBuilder: ((context, index) {
-        return  Column(
+        return const Column(
           children: [
             OrderProductWidget(),
           ],
