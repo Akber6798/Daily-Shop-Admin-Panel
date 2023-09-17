@@ -26,8 +26,8 @@ class MainController extends ChangeNotifier {
 
   //* for all products
   void controlAllProductsMenu() {
-    if (!getProductScaffoldKey.currentState!.isDrawerOpen) {
-      getProductScaffoldKey.currentState!.openDrawer();
+    if (!_producScaffoldKey.currentState!.isDrawerOpen) {
+      _producScaffoldKey.currentState!.openDrawer();
     }
   }
 

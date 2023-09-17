@@ -3,7 +3,7 @@ import 'package:daily_shop_admin_panel/commonWidgets/header_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/responsive_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/vertical_spacing_widget.dart';
 import 'package:daily_shop_admin_panel/controllers/main_controller.dart';
-import 'package:daily_shop_admin_panel/screens/widget/product_grid_view_widget.dart';
+import 'package:daily_shop_admin_panel/screens/viewAllProductScreen/widget/product_grid_view_widget.dart';
 import 'package:daily_shop_admin_panel/services/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

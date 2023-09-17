@@ -1,4 +1,4 @@
-import 'package:daily_shop_admin_panel/screens/widget/order_product_widget.dart';
+import 'package:daily_shop_admin_panel/screens/viewAllOrdersScreen/widget/order_product_widget.dart';
 import 'package:flutter/material.dart';
 
 class OrderProductListing extends StatelessWidget {
@@ -11,7 +11,7 @@ class OrderProductListing extends StatelessWidget {
       shrinkWrap: true,
       itemCount: 10,
       itemBuilder: ((context, index) {
-        return const Column(
+        return  Column(
           children: [
             OrderProductWidget(),
           ],

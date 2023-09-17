@@ -1,5 +1,5 @@
 import 'package:daily_shop_admin_panel/consts/app_colors.dart';
-import 'package:daily_shop_admin_panel/screens/widget/product_card_widget.dart';
+import 'package:daily_shop_admin_panel/screens/viewAllProductScreen/widget/product_card_widget.dart';
 import 'package:flutter/material.dart';
 
 class ProductGridViewWidget extends StatelessWidget {

@@ -5,10 +5,15 @@ import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
 import 'package:flutter/material.dart';
 
 class HeaderWidget extends StatelessWidget {
-  const HeaderWidget({super.key, required this.function, required this.title});
+  const HeaderWidget(
+      {super.key,
+      required this.function,
+      required this.title,
+      this.itInAddProductScreen = false});
 
   final Function function;
   final String title;
+  final bool itInAddProductScreen;
 
   @override
   Widget build(BuildContext context) {
@@ -35,39 +40,41 @@ class HeaderWidget extends StatelessWidget {
           ),
         if (ResponsiveWidget.isDesktop(context))
           Spacer(flex: ResponsiveWidget.isDesktop(context) ? 2 : 1),
-        Expanded(
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: "Search",
-              fillColor: Theme.of(context).cardColor,
-              filled: true,
-              border: const OutlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-              suffixIcon: InkWell(
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.all(defaultPadding * 0.75),
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: defaultPadding / 2),
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
+        itInAddProductScreen
+            ? Container()
+            : Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: "Search",
+                    fillColor: Theme.of(context).cardColor,
+                    filled: true,
+                    border: const OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(10),
+                      ),
+                    ),
+                    suffixIcon: InkWell(
+                      onTap: () {},
+                      child: Container(
+                        padding: const EdgeInsets.all(defaultPadding * 0.75),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: defaultPadding / 2),
+                        decoration: const BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.search,
+                          size: 25,
+                        ),
+                      ),
                     ),
                   ),
-                  child: const Icon(
-                    Icons.search,
-                    size: 25,
-                  ),
                 ),
               ),
-            ),
-          ),
-        ),
       ],
     );
   }
