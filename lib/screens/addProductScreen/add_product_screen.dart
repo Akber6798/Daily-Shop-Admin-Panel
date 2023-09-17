@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:daily_shop_admin_panel/commonWidgets/common_button_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/custom_drawer_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/header_widget.dart';
@@ -9,8 +11,10 @@ import 'package:daily_shop_admin_panel/controllers/main_controller.dart';
 import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
 import 'package:daily_shop_admin_panel/services/utils.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class AddProductScreen extends StatefulWidget {
@@ -27,9 +31,23 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String categoryDropDownValue = "Vegetables";
   int radioGroupValue = 1;
   bool inPiece = false;
+  File? pickedMobileImage;
+  Uint8List pickedWebImage = Uint8List(8);
 
   void validationForAddProduct() {
     final isValid = formKey.currentState!.validate();
+  }
+
+  void clearProduct() {
+    titleController.clear();
+    priceController.clear();
+    inPiece = false;
+    radioGroupValue = 1;
+    categoryDropDownValue = "Vegetables";
+    setState(() {
+      pickedMobileImage = null;
+      pickedWebImage = Uint8List(8);
+    });
   }
 
   @override
@@ -237,16 +255,28 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Container(
-                                    height: size.width > 650
-                                        ? 350
-                                        : size.width * 0.45,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: dottedBorderContainer(),
-                                  ),
+                                      height: size.width > 650
+                                          ? 350
+                                          : size.width * 0.45,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: pickedMobileImage == null
+                                          ? dottedBorderContainer()
+                                          : ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              child: kIsWeb
+                                                  ? Image.memory(
+                                                      pickedWebImage,
+                                                      fit: BoxFit.fill,
+                                                    )
+                                                  : Image.file(
+                                                      pickedMobileImage!,
+                                                      fit: BoxFit.fill),
+                                            )),
                                 ),
                               ),
                               Expanded(
@@ -255,24 +285,29 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   child: Column(
                                     children: [
                                       TextButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          setState(() {
+                                            pickedMobileImage = null;
+                                            pickedWebImage = Uint8List(8);
+                                          });
+                                        },
                                         child: Text(
                                           "Clear image",
                                           style: AppTextStyle.instance
                                               .mainTextStyle(
-                                                  fSize: 24,
+                                                  fSize: 26,
                                                   fWeight: FontWeight.bold,
                                                   color: redColor),
                                         ),
                                       ),
-                                      const VerticalSpacingWidget(height: 5),
+                                      const VerticalSpacingWidget(height: 40),
                                       TextButton(
                                         onPressed: () {},
                                         child: Text(
                                           "Update image",
                                           style: AppTextStyle.instance
                                               .mainTextStyle(
-                                                  fSize: 24,
+                                                  fSize: 26,
                                                   fWeight: FontWeight.bold,
                                                   color: Colors.blue),
                                         ),
@@ -291,7 +326,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   height: 50,
                                   width: 100,
                                   title: "Clear",
-                                  onPressedFunction: () {},
+                                  onPressedFunction: () {
+                                    clearProduct();
+                                  },
                                   icon: IconlyBold.danger,
                                   buttonColor: redColor),
                               CommonButtonWidget(
@@ -317,6 +354,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
         ],
       ),
     );
+  }
+
+  //! for select the image (need to check if mobile or web)
+  Future<void> pickImage() async {
+    if (!kIsWeb) {
+      //* if mobile
+      final ImagePicker imagePicker = ImagePicker();
+      XFile? image = await imagePicker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        var selectedImage = File(image.path);
+        setState(() {
+          pickedMobileImage = selectedImage;
+        });
+      } else {
+        print("No image is picked");
+      }
+    } else if (kIsWeb) {
+      //* if web
+      final ImagePicker imagePicker = ImagePicker();
+      XFile? image = await imagePicker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        var finalWebImage = await image.readAsBytes();
+        setState(() {
+          pickedWebImage = finalWebImage;
+          pickedMobileImage = File("a"); // to avoid null error
+        });
+      } else {
+        print("No image is picked");
+      }
+    } else {
+      print("Something went wrong");
+    }
   }
 
   //! for dropdown
@@ -367,7 +436,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 size: 150,
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  pickImage();
+                },
                 child: Text(
                   "Choose an image",
                   style: AppTextStyle.instance.mainTextStyle(
