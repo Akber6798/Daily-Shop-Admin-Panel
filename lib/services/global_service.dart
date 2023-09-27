@@ -7,7 +7,8 @@ class GlobalServices {
   static GlobalServices instance = GlobalServices();
 
   //* for closing dialogue
-  closingDailogue(BuildContext context, String title, String content, Function yesFunction) {
+  closingDailogue(BuildContext context, String title, String content,
+      Function yesFunction) {
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -54,6 +55,50 @@ class GlobalServices {
                     fSize: 18, fWeight: FontWeight.bold, color: redColor),
               ),
             )
+          ],
+        );
+      }),
+    );
+  }
+
+  //* for error
+  errorDailogue(BuildContext context, String content) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: ((context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          title: Text(
+            "An error occured",
+            style: AppTextStyle.instance.mainTextStyle(
+                fSize: 21,
+                fWeight: FontWeight.bold,
+                color: GetColorThemeService(context).headingTextColor),
+          ),
+          content: Text(
+            content,
+            style: AppTextStyle.instance.mainTextStyle(
+                fSize: 18,
+                fWeight: FontWeight.w400,
+                color: GetColorThemeService(context).textColor),
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                "Ok",
+                style: AppTextStyle.instance.mainTextStyle(
+                    fSize: 16,
+                    fWeight: FontWeight.w800,
+                    color: GetColorThemeService(context).headingTextColor),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ],
         );
       }),
