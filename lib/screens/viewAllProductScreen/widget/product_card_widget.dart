@@ -1,11 +1,62 @@
+// ignore_for_file: use_build_context_synchronously, unnecessary_null_comparison
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/horizontal_spacing_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/vertical_spacing_widget.dart';
 import 'package:daily_shop_admin_panel/consts/app_text_style.dart';
+import 'package:daily_shop_admin_panel/screens/editProductScreen/edit_product_screen.dart';
 import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
+import 'package:daily_shop_admin_panel/services/global_service.dart';
 import 'package:flutter/material.dart';
 
-class ProductCardWidget extends StatelessWidget {
-  const ProductCardWidget({super.key});
+class ProductCardWidget extends StatefulWidget {
+  const ProductCardWidget({super.key, required this.productId});
+
+  final String productId;
+
+  @override
+  State<ProductCardWidget> createState() => _ProductCardWidgetState();
+}
+
+class _ProductCardWidgetState extends State<ProductCardWidget> {
+  String title = '';
+  String categoryName = '';
+  String? imageUrl;
+  String originalPrice = "0.0";
+  double offerPrice = 0.0;
+  bool isOnOffer = false;
+  bool isPiece = false;
+
+  @override
+  void initState() {
+    super.initState();
+    getProductInformation();
+  }
+
+  //* to get the user details
+  Future<void> getProductInformation() async {
+    try {
+      final DocumentSnapshot productData = await FirebaseFirestore.instance
+          .collection("products")
+          .doc(widget.productId)
+          .get();
+      if (productData == null) {
+        return;
+      } else {
+        setState(() {
+          title = productData.get('title');
+          categoryName = productData.get('categoryName');
+          imageUrl = productData.get('imageUrl');
+          originalPrice = productData.get('originalPrice');
+          offerPrice = productData.get('offerPrice');
+          isOnOffer = productData.get('isOnOffer');
+          isPiece = productData.get('isPiece');
+        });
+      }
+    } catch (error) {
+      GlobalServices.instance.errorDailogue(context, error.toString());
+    } finally {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +64,27 @@ class ProductCardWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       color: Theme.of(context).cardColor,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return EditProductScreen(
+                  id: widget.productId,
+                  imageUrl: imageUrl == null
+                      ? "https://www.lifepng.com/wp-content/uploads/2020/11/Apricot-Large-Single-png-hd.png"
+                      : imageUrl!,
+                  title: title,
+                  price: originalPrice,
+                  offerPrice: offerPrice,
+                  isOnOffer: isOnOffer,
+                  isPiece: isPiece,
+                  productCategory: categoryName,
+                );
+              },
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Column(
@@ -24,14 +95,15 @@ class ProductCardWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Flexible(
+                  Flexible(
                     flex: 2,
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Image(
-                        image: NetworkImage(
-                            "https://www.lifepng.com/wp-content/uploads/2020/11/Apricot-Large-Single-png-hd.png"),
-                        width: 180,
+                        image: NetworkImage(imageUrl == null
+                            ? "https://www.lifepng.com/wp-content/uploads/2020/11/Apricot-Large-Single-png-hd.png"
+                            : imageUrl!),
+                        width: 230,
                       ),
                     ),
                   ),
@@ -59,7 +131,9 @@ class ProductCardWidget extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    "₹ 60",
+                    isOnOffer
+                        ? "₹${offerPrice.toStringAsFixed(2)}"
+                        : "₹$originalPrice",
                     style: AppTextStyle.instance.mainTextStyle(
                         fSize: 16,
                         fWeight: FontWeight.bold,
@@ -67,9 +141,9 @@ class ProductCardWidget extends StatelessWidget {
                   ),
                   const HorizontalSpacingWidget(width: 7),
                   Visibility(
-                    visible: true,
+                    visible: isOnOffer,
                     child: Text(
-                      '100',
+                      originalPrice,
                       style: TextStyle(
                           decoration: TextDecoration.lineThrough,
                           color: GetColorThemeService(context).textColor),
@@ -77,7 +151,7 @@ class ProductCardWidget extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    "1Kg",
+                    isPiece ? "Piece" : "1Kg",
                     style: AppTextStyle.instance.mainTextStyle(
                         fSize: 15,
                         fWeight: FontWeight.bold,
@@ -87,7 +161,7 @@ class ProductCardWidget extends StatelessWidget {
               ),
               const VerticalSpacingWidget(height: 10),
               Text(
-                "Title",
+                title,
                 style: AppTextStyle.instance.mainTextStyle(
                     fSize: 17,
                     fWeight: FontWeight.w500,

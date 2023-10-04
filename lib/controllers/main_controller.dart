@@ -8,6 +8,8 @@ class MainController extends ChangeNotifier {
   final GlobalKey<ScaffoldState> _orderScaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<ScaffoldState> _addProductScaffoldKey =
       GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _editProductScaffoldKey =
+      GlobalKey<ScaffoldState>();
 
   //* Getters
   //* this is used to identify the screen in this project they multiple dashboard screens
@@ -16,6 +18,8 @@ class MainController extends ChangeNotifier {
   GlobalKey<ScaffoldState> get getOrderScaffoldKey => _orderScaffoldKey;
   GlobalKey<ScaffoldState> get getAddProductscaffoldKey =>
       _addProductScaffoldKey;
+  GlobalKey<ScaffoldState> get getEditProductscaffoldKey =>
+      _editProductScaffoldKey;
 
   //* for dashboard
   void controlDashboarkMenu() {
@@ -42,6 +46,13 @@ class MainController extends ChangeNotifier {
   void controlAddProductsMenu() {
     if (!_addProductScaffoldKey.currentState!.isDrawerOpen) {
       _addProductScaffoldKey.currentState!.openDrawer();
+    }
+  }
+
+  //* for edit product
+  void controlEditProductsMenu() {
+    if (!_editProductScaffoldKey.currentState!.isDrawerOpen) {
+      _editProductScaffoldKey.currentState!.openDrawer();
     }
   }
 }

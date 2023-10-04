@@ -7,6 +7,7 @@ import 'package:daily_shop_admin_panel/consts/app_text_style.dart';
 import 'package:daily_shop_admin_panel/controllers/main_controller.dart';
 import 'package:daily_shop_admin_panel/screens/addProductScreen/add_product_screen.dart';
 import 'package:daily_shop_admin_panel/screens/viewAllOrdersScreen/widget/order_product_listing_widget.dart';
+import 'package:daily_shop_admin_panel/screens/viewAllProductScreen/view_all_product_screen.dart';
 import 'package:daily_shop_admin_panel/screens/viewAllProductScreen/widget/product_grid_view_widget.dart';
 import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
 import 'package:daily_shop_admin_panel/services/utils.dart';
@@ -54,7 +55,12 @@ class DashBoardScreen extends StatelessWidget {
                       title: "View All",
                       icon: Icons.store,
                       buttonColor: greenColor,
-                      onPressedFunction: () {}),
+                      onPressedFunction: () {
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) {
+                          return const ViewAllProductScreen();
+                        }));
+                      }),
                   CommonButtonWidget(
                       height: 50,
                       width: 130,

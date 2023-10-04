@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/common_button_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/custom_drawer_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/header_widget.dart';
+import 'package:daily_shop_admin_panel/commonWidgets/horizontal_spacing_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/loading_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/responsive_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/vertical_spacing_widget.dart';
@@ -14,7 +15,6 @@ import 'package:daily_shop_admin_panel/controllers/main_controller.dart';
 import 'package:daily_shop_admin_panel/services/get_theme_color_service.dart';
 import 'package:daily_shop_admin_panel/services/global_service.dart';
 import 'package:daily_shop_admin_panel/services/utils.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,67 +22,84 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iconly/iconly.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
-class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({super.key});
+class EditProductScreen extends StatefulWidget {
+  const EditProductScreen(
+      {super.key,
+      required this.id,
+      required this.title,
+      required this.price,
+      required this.productCategory,
+      required this.imageUrl,
+      required this.isPiece,
+      required this.isOnOffer,
+      required this.offerPrice});
+
+  final String id, title, price, productCategory, imageUrl;
+  final bool isPiece, isOnOffer;
+  final double offerPrice;
 
   @override
-  State<AddProductScreen> createState() => _AddProductScreenState();
+  State<EditProductScreen> createState() => _EditProductScreenState();
 }
 
-class _AddProductScreenState extends State<AddProductScreen> {
+class _EditProductScreenState extends State<EditProductScreen> {
   final formKey = GlobalKey<FormState>();
-  final titleController = TextEditingController();
-  final priceController = TextEditingController();
-  String categoryDropDownValue = "Vegetables";
-  int radioGroupValue = 1;
-  bool isPiece = false;
-  File? pickedMobileImage;
-  Uint8List pickedWebImage = Uint8List(8);
+  late final TextEditingController editTitleController;
+  late final TextEditingController editPriceController;
+  String? offerPercentage;
+  late String percentageToShow;
+  late String editCategoryDropDownValue;
+  late bool isOnOffer;
+  late double offerPrice;
+  late bool isPiece;
+  late int quantityValue;
+  late String imageUrl;
+  int editRadioGroupValue = 1;
+  File? editPickedMobileImage;
+  Uint8List editPickedWebImage = Uint8List(8);
   bool isLoading = false;
 
-  //* add product
-  void addProductToDatabase() async {
+  //* update product
+  void editProductToDatabase() async {
     final isValid = formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
     if (isValid) {
       formKey.currentState!.save();
-      if (pickedMobileImage == null) {
-        GlobalServices.instance.errorDailogue(context, "Please pick an image");
-        return;
-      }
-      final uuid = const Uuid().v4();
       try {
+        String? editImageUrl;
         setState(() {
           isLoading = true;
         });
         //* to add image to storage
-        final firebaseStorage = FirebaseStorage.instance
-            .ref()
-            .child('productImages')
-            .child('$uuid.jpg');
-        if (kIsWeb) {
-          await firebaseStorage.putData(pickedWebImage);
-        } else {
-          await firebaseStorage.putFile(pickedMobileImage!);
+        if (editPickedMobileImage != null) {
+          final firebaseStorage = FirebaseStorage.instance
+              .ref()
+              .child('productImages')
+              .child('${widget.id}.jpg');
+          if (kIsWeb) {
+            await firebaseStorage.putData(editPickedWebImage);
+          } else {
+            await firebaseStorage.putFile(editPickedMobileImage!);
+          }
+          editImageUrl = await firebaseStorage.getDownloadURL();
         }
-        String imageUrl = await firebaseStorage.getDownloadURL();
         //* to add product to firestore
-        await FirebaseFirestore.instance.collection('products').doc(uuid).set({
-          'id': uuid,
-          'title': titleController.text,
-          'originalPrice': priceController.text,
-          'offerPrice': 0.1,
-          'imageUrl': imageUrl,
-          'categoryName': categoryDropDownValue,
-          'isOnOffer': false,
+        await FirebaseFirestore.instance
+            .collection('products')
+            .doc(widget.id)
+            .update({
+          'title': editTitleController.text,
+          'originalPrice': editPriceController.text,
+          'offerPrice': offerPrice,
+          'imageUrl':
+              editPickedMobileImage == null ? widget.imageUrl : editImageUrl,
+          'categoryName': editCategoryDropDownValue,
+          'isOnOffer': isOnOffer,
           'isPiece': isPiece,
-          'createdAt': Timestamp.now()
         });
-        clearProduct();
-        Fluttertoast.showToast(
-            msg: "Product uploaded succesfully",
+        await Fluttertoast.showToast(
+            msg: "Product has been updated",
             toastLength: Toast.LENGTH_LONG,
             gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 1,
@@ -108,50 +125,54 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
   }
 
-  void clearProduct() {
-    titleController.clear();
-    priceController.clear();
-    isPiece = false;
-    radioGroupValue = 1;
-    categoryDropDownValue = "Vegetables";
-    setState(() {
-      pickedMobileImage = null;
-      pickedWebImage = Uint8List(8);
-    });
+  @override
+  void initState() {
+    super.initState();
+    editTitleController = TextEditingController(text: widget.title);
+    editPriceController = TextEditingController(text: widget.price);
+    editCategoryDropDownValue = widget.productCategory;
+    isOnOffer = widget.isOnOffer;
+    isPiece = widget.isPiece;
+    offerPrice = widget.offerPrice;
+    quantityValue = isPiece ? 2 : 1;
+    imageUrl = widget.imageUrl;
+    //* calculate the percentage
+    percentageToShow =
+        "${(100 - (offerPrice * 100) / double.parse(widget.price)).round().toStringAsFixed(1)}%";
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = Utils(context).getScreenSize;
     return Scaffold(
-      key: context.read<MainController>().getAddProductscaffoldKey,
+      // key: context.read<MainController>().getEditProductscaffoldKey,
       drawer: const CustomDrawerWidget(),
       body: LoadingWidget(
         isLoading: isLoading,
         child: Row(
           children: [
-            if (ResponsiveWidget.isDesktop(context))
-              const Expanded(
-                //* default flex = 1
-                //* and it takes 1/6 part of the screen
-                child: CustomDrawerWidget(),
-              ),
+            // if (ResponsiveWidget.isDesktop(context))
+            //   const Expanded(
+            //     //* default flex = 1
+            //     //* and it takes 1/6 part of the screen
+            //     child: CustomDrawerWidget(),
+            //   ),
             Expanded(
               //* It takes 5/6 part of the screen
               flex: 5,
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    HeaderWidget(
-                        itInAddProductScreen: true,
-                        function: () {
-                          context
-                              .read<MainController>()
-                              .controlAddProductsMenu();
-                        },
-                        title: "Add Product"),
+                    // HeaderWidget(
+                    //     itInAddProductScreen: true,
+                    //     function: () {
+                    //       context
+                    //           .read<MainController>()
+                    //           .controlAddProductsMenu();
+                    //     },
+                    //     title: "Edit Product"),
                     const VerticalSpacingWidget(height: 20),
-                    //! product add box
+                    //! Edit product box
                     Container(
                       width: size.width > 650 ? 650 : size.width,
                       padding: const EdgeInsets.all(16),
@@ -166,7 +187,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            //! title add
+                            //! title
                             Text(
                               "Product Title*",
                               style: AppTextStyle.instance.mainTextStyle(
@@ -178,7 +199,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             ),
                             const VerticalSpacingWidget(height: 10),
                             TextFormField(
-                              controller: titleController,
+                              controller: editTitleController,
                               keyboardType: TextInputType.name,
                               cursorColor: GetColorThemeService(context)
                                   .headingTextColor,
@@ -217,7 +238,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        //! price add
+                                        //! price
                                         Text(
                                           "Price in ₹*",
                                           style: AppTextStyle.instance
@@ -232,7 +253,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         SizedBox(
                                           width: 100,
                                           child: TextFormField(
-                                            controller: priceController,
+                                            controller: editPriceController,
                                             keyboardType: TextInputType.number,
                                             cursorColor:
                                                 GetColorThemeService(context)
@@ -261,7 +282,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           ),
                                         ),
                                         const VerticalSpacingWidget(height: 20),
-                                        //! select category
+                                        //! category
                                         Text(
                                           "Product Category*",
                                           style: AppTextStyle.instance
@@ -273,9 +294,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           ),
                                         ),
                                         const VerticalSpacingWidget(height: 10),
-                                        categoryDropDownButton(),
+                                        editCategoryDropDownButton(),
                                         const VerticalSpacingWidget(height: 20),
-                                        //! select unit
+                                        //! unit =(kg or piece)
                                         Text(
                                           "Measure Unit*",
                                           style: AppTextStyle.instance
@@ -292,10 +313,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             const Text("KG"),
                                             Radio(
                                               value: 1,
-                                              groupValue: radioGroupValue,
+                                              groupValue: editRadioGroupValue,
                                               onChanged: (newValue) {
                                                 setState(() {
-                                                  radioGroupValue = 1;
+                                                  editRadioGroupValue = 1;
                                                   isPiece = false;
                                                 });
                                               },
@@ -306,10 +327,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             const Text("Piece"),
                                             Radio(
                                               value: 2,
-                                              groupValue: radioGroupValue,
+                                              groupValue: editRadioGroupValue,
                                               onChanged: (newValue) {
                                                 setState(() {
-                                                  radioGroupValue = 2;
+                                                  editRadioGroupValue = 2;
                                                   isPiece = true;
                                                 });
                                               },
@@ -319,7 +340,60 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             )
                                           ],
                                         ),
-                                        const VerticalSpacingWidget(height: 20),
+                                        const VerticalSpacingWidget(height: 10),
+                                        //! check box for offer
+                                        Row(
+                                          children: [
+                                            Checkbox(
+                                                value: isOnOffer,
+                                                onChanged: (newValue) {
+                                                  setState(() {
+                                                    isOnOffer = newValue!;
+                                                  });
+                                                }),
+                                            const HorizontalSpacingWidget(
+                                                width: 5),
+                                            Text(
+                                              "Offer",
+                                              style: AppTextStyle.instance
+                                                  .mainTextStyle(
+                                                      fSize: 10,
+                                                      fWeight: FontWeight.w500,
+                                                      color:
+                                                          GetColorThemeService(
+                                                                  context)
+                                                              .textColor),
+                                            ),
+                                          ],
+                                        ),
+                                        const VerticalSpacingWidget(height: 10),
+                                        //! offer
+                                        AnimatedSwitcher(
+                                          duration: const Duration(seconds: 1),
+                                          child: !isOnOffer
+                                              ? Container()
+                                              : Row(
+                                                  children: [
+                                                    Text(
+                                                      "₹${offerPrice.toStringAsFixed(2)}",
+                                                      style: AppTextStyle
+                                                          .instance
+                                                          .mainTextStyle(
+                                                        fSize: 12,
+                                                        fWeight:
+                                                            FontWeight.w500,
+                                                        color:
+                                                            GetColorThemeService(
+                                                                    context)
+                                                                .textColor,
+                                                      ),
+                                                    ),
+                                                    const HorizontalSpacingWidget(
+                                                        width: 10),
+                                                    offerPercentageDropDownButton()
+                                                  ],
+                                                ),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -339,80 +413,80 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           borderRadius:
                                               BorderRadius.circular(12),
                                         ),
-                                        child: pickedMobileImage == null
-                                            ? dottedBorderContainer()
-                                            : ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                child: kIsWeb
-                                                    ? Image.memory(
-                                                        pickedWebImage,
-                                                        fit: BoxFit.fill,
-                                                      )
-                                                    : Image.file(
-                                                        pickedMobileImage!,
-                                                        fit: BoxFit.fill),
-                                              )),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: editPickedMobileImage == null
+                                              ? Image.network(imageUrl)
+                                              : kIsWeb
+                                                  ? Image.memory(
+                                                      editPickedWebImage,
+                                                      fit: BoxFit.fill,
+                                                    )
+                                                  : Image.file(
+                                                      editPickedMobileImage!,
+                                                      fit: BoxFit.fill),
+                                        )),
                                   ),
                                 ),
                                 Expanded(
                                   flex: 1,
                                   child: FittedBox(
-                                    child: Column(
-                                      children: [
-                                        TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              pickedMobileImage = null;
-                                              pickedWebImage = Uint8List(8);
-                                            });
-                                          },
-                                          child: Text(
-                                            "Clear image",
-                                            style: AppTextStyle.instance
-                                                .mainTextStyle(
-                                                    fSize: 26,
-                                                    fWeight: FontWeight.bold,
-                                                    color: redColor),
-                                          ),
-                                        ),
-                                        const VerticalSpacingWidget(height: 40),
-                                        TextButton(
-                                          onPressed: () {},
-                                          child: Text(
-                                            "Update image",
-                                            style: AppTextStyle.instance
-                                                .mainTextStyle(
-                                                    fSize: 26,
-                                                    fWeight: FontWeight.bold,
-                                                    color: Colors.blue),
-                                          ),
-                                        ),
-                                      ],
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Text(
+                                        "Update image",
+                                        style: AppTextStyle.instance
+                                            .mainTextStyle(
+                                                fSize: 26,
+                                                fWeight: FontWeight.bold,
+                                                color: Colors.blue),
+                                      ),
                                     ),
                                   ),
                                 )
                               ],
                             ),
                             const VerticalSpacingWidget(height: 20),
+                            //! delete and update
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 CommonButtonWidget(
                                     height: 50,
                                     width: 100,
-                                    title: "Clear",
+                                    title: "Delete",
                                     onPressedFunction: () {
-                                      clearProduct();
+                                      GlobalServices.instance.closingDailogue(
+                                          context,
+                                          "Delete?",
+                                          "Press okey to confirm", () async {
+                                        await FirebaseFirestore.instance
+                                            .collection('products')
+                                            .doc(widget.id)
+                                            .delete();
+                                        await Fluttertoast.showToast(
+                                            msg: "Product has been deleted",
+                                            toastLength: Toast.LENGTH_LONG,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIosWeb: 1,
+                                            backgroundColor:
+                                                Colors.grey.shade600,
+                                            textColor: whiteColor,
+                                            fontSize: 16);
+                                        while (Navigator.canPop(context)) {
+                                          Navigator.pop(context);
+                                        }
+                                      });
                                     },
                                     icon: IconlyBold.danger,
                                     buttonColor: redColor),
                                 CommonButtonWidget(
                                     height: 45,
                                     width: 110,
-                                    title: "Upload",
+                                    title: "Update",
                                     onPressedFunction: () {
-                                      addProductToDatabase();
+                                      editProductToDatabase();
                                     },
                                     icon: IconlyBold.upload,
                                     buttonColor: greenColor)
@@ -442,7 +516,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (image != null) {
         var selectedImage = File(image.path);
         setState(() {
-          pickedMobileImage = selectedImage;
+          editPickedMobileImage = selectedImage;
         });
       } else {
         print("No image is picked");
@@ -454,8 +528,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (image != null) {
         var finalWebImage = await image.readAsBytes();
         setState(() {
-          pickedWebImage = finalWebImage;
-          pickedMobileImage = File("a"); // to avoid null error
+          editPickedWebImage = finalWebImage;
+          editPickedMobileImage = File("a"); // to avoid null error
         });
       } else {
         print("No image is picked");
@@ -465,8 +539,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
   }
 
-  //! for dropdown
-  Widget categoryDropDownButton() {
+  //! for dropdown for category
+  Widget editCategoryDropDownButton() {
     return Container(
       padding: const EdgeInsets.all(8),
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -476,10 +550,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
               fSize: 15, fWeight: FontWeight.w500, color: redColor),
           onChanged: (newValue) {
             setState(() {
-              categoryDropDownValue = newValue!;
+              editCategoryDropDownValue = newValue!;
             });
           },
-          value: categoryDropDownValue,
+          value: editCategoryDropDownValue,
           hint: const Text("Select a category"),
           items: const [
             DropdownMenuItem(value: "Vegetables", child: Text("Vegetables")),
@@ -494,37 +568,52 @@ class _AddProductScreenState extends State<AddProductScreen> {
     );
   }
 
-  //! for dotborder
-  Widget dottedBorderContainer() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: DottedBorder(
-        dashPattern: const [6, 7],
-        borderType: BorderType.RRect,
-        color: GetColorThemeService(context).textColor,
-        radius: const Radius.circular(12),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.image_outlined,
-                color: GetColorThemeService(context).textColor,
-                size: 150,
-              ),
-              TextButton(
-                onPressed: () {
-                  pickImage();
-                },
-                child: Text(
-                  "Choose an image",
-                  style: AppTextStyle.instance.mainTextStyle(
-                      fSize: 18, fWeight: FontWeight.w600, color: Colors.blue),
-                ),
-              )
-            ],
+  //! for select the percentage
+  DropdownButtonHideUnderline offerPercentageDropDownButton() {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton(
+        style: AppTextStyle.instance.mainTextStyle(
+            fSize: 15, fWeight: FontWeight.w500, color: redColor),
+        items: const [
+          DropdownMenuItem(
+            value: "0",
+            child: Text("0%"),
           ),
-        ),
+          DropdownMenuItem(
+            value: "10",
+            child: Text("10%"),
+          ),
+          DropdownMenuItem(
+            value: "15",
+            child: Text("15%"),
+          ),
+          DropdownMenuItem(
+            value: "25",
+            child: Text("25%"),
+          ),
+          DropdownMenuItem(
+            value: "50",
+            child: Text("50%"),
+          ),
+          DropdownMenuItem(
+            value: "75",
+            child: Text("75%"),
+          ),
+        ],
+        onChanged: (newValue) {
+          if (newValue == "0") {
+            return;
+          } else {
+            setState(() {
+              offerPercentage = newValue;
+              //* calculation of offer price
+              offerPrice = double.parse(widget.price) -
+                  (double.parse(newValue!) * double.parse(widget.price) / 100);
+            });
+          }
+        },
+        hint: Text(offerPercentage ?? percentageToShow),
+        value: offerPercentage,
       ),
     );
   }
@@ -532,7 +621,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   void dispose() {
     super.dispose();
-    titleController.dispose();
-    priceController.dispose();
+    editTitleController.dispose();
+    editPriceController.dispose();
   }
 }

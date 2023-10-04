@@ -13,7 +13,10 @@ void main() async {
         apiKey: "AIzaSyBNWPM79qFb0EK4c_H24cSuUzf3Zeqtb5I",
         appId: "1:58854265954:web:7d53de0a8eeb090b91ad3b",
         messagingSenderId: "58854265954",
-        projectId: "daily-shop-cc247"),
+        projectId: "daily-shop-cc247",
+        storageBucket: "daily-shop-cc247.appspot.com",
+        ),
+        
   );
   runApp(const MyApp());
 }
