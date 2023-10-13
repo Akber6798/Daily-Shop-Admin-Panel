@@ -113,7 +113,7 @@ class DashBoardScreen extends StatelessWidget {
                     color: GetColorThemeService(context).headingTextColor),
               ),
               const VerticalSpacingWidget(height: 20),
-              const OrderProductListing()
+              const OrderProductListing(isInDashboard: true)
             ],
           ),
         ),

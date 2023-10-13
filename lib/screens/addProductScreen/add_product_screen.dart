@@ -74,7 +74,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           'title': titleController.text,
           'originalPrice': priceController.text,
           'offerPrice': 0.1,
-          'imageUrl': imageUrl,
+          'imageUrl': imageUrl.toString(),
           'categoryName': categoryDropDownValue,
           'isOnOffer': false,
           'isPiece': isPiece,
@@ -108,6 +108,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
   }
 
+  //* to clear products
   void clearProduct() {
     titleController.clear();
     priceController.clear();

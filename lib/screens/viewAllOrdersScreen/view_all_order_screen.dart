@@ -37,13 +37,14 @@ class ViewAllOrderScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       HeaderWidget(
+                        itInAddProductScreen: true,
                         title: "All Orders",
                         function: () {
                           context.read<MainController>().controlAllOrdersMenu();
                         },
                       ),
                       const VerticalSpacingWidget(height: 20),
-                      const OrderProductListing()
+                      const OrderProductListing(isInDashboard: false)
                     ],
                   ),
                 ),
