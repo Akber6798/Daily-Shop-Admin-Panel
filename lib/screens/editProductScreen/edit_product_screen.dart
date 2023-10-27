@@ -3,7 +3,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/common_button_widget.dart';
-import 'package:daily_shop_admin_panel/commonWidgets/custom_drawer_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/horizontal_spacing_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/loading_widget.dart';
 import 'package:daily_shop_admin_panel/commonWidgets/vertical_spacing_widget.dart';
@@ -531,10 +530,20 @@ class _EditProductScreenState extends State<EditProductScreen> {
           items: const [
             DropdownMenuItem(value: "Vegetables", child: Text("Vegetables")),
             DropdownMenuItem(value: "Fruits", child: Text("Fruits")),
-            DropdownMenuItem(value: "Grains", child: Text("Grains")),
-            DropdownMenuItem(value: "Nuts", child: Text("Nuts")),
-            DropdownMenuItem(value: "Herbs", child: Text("Herbs")),
-            DropdownMenuItem(value: "Spices", child: Text("Spices")),
+            DropdownMenuItem(value: "Nuts", child: Text("Grains")),
+            DropdownMenuItem(value: "Grains", child: Text("Nuts")),
+            DropdownMenuItem(value: "Dairy", child: Text("Dairy")),
+            DropdownMenuItem(value: "Bread & baked goods", child: Text("Bread & baked goods")),
+            DropdownMenuItem(value: "Meat & Fish", child: Text("Meat & Fish")),
+            DropdownMenuItem(value: "Sauces & Condiments", child: Text("Sauces & Condiments")),
+            DropdownMenuItem(value: "Herbs & Spices", child: Text("Herbs & Spices")),
+            DropdownMenuItem(value: "Frozen foods", child: Text("Frozen foods")),
+            DropdownMenuItem(value: "Snacks", child: Text("Snacks")),
+            DropdownMenuItem(value: "Drinks", child: Text("Drinks")),
+            DropdownMenuItem(value: "Household & cleaning", child: Text("Household & cleaning")),
+            DropdownMenuItem(value: "Personal care", child: Text("Personal care")),
+            DropdownMenuItem(value: "Pet care", child: Text("Pet care")),
+            DropdownMenuItem(value: "Baby products", child: Text("Baby products")),
           ],
         ),
       ),
