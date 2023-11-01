@@ -166,7 +166,10 @@ class _ProductCardWidgetState extends State<ProductCardWidget> {
                     fSize: 17,
                     fWeight: FontWeight.w500,
                     color: GetColorThemeService(context).textColor),
-              )
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
             ],
           ),
         ),
